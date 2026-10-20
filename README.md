@@ -1,5 +1,7 @@
 # 沪深300全收益 vs 二级债基指数
 
+[![update-data](https://github.com/dul30984-cpu/hs300-vs-2ndbond/actions/workflows/update.yml/badge.svg)](https://github.com/dul30984-cpu/hs300-vs-2ndbond/actions/workflows/update.yml)
+
 **在线看板：https://dul30984-cpu.github.io/hs300-vs-2ndbond/**
 
 - 两条指数叠加：沪深300全收益（H00300）与二级债基指数，2004-12-31 = 1000。

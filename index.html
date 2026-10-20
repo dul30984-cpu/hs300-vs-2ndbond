@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>沪深300全收益 vs 二级债基指数</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --line:#e6e8eb; --text:#1f2329;
+    --muted:#7a8088; --accent:#7b2d8e; --red:#e03131; --green:#2f9e44;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font-family:-apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif}
+  .top{display:flex;align-items:center;gap:16px;padding:14px 20px;background:var(--card);
+       border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .top h1{font-size:17px;margin:0;font-weight:650;letter-spacing:.3px}
+  .top .sub{font-size:12px;color:var(--muted)}
+  .spacer{flex:1}
+  .btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;
+       font-size:13px;cursor:pointer;color:var(--text)}
+  .btn:hover{background:#f2f3f5}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn.primary:hover{filter:brightness(1.08)}
+  .btn:disabled{opacity:.5;cursor:default}
+  .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+  .seg button{border:0;background:transparent;padding:6px 11px;font-size:13px;cursor:pointer;color:var(--muted)}
+  .seg button.on{background:#efe7f3;color:var(--accent);font-weight:600}
+  .status{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+  .dot.busy{background:#f08c00;animation:pulse 1s infinite}
+  .dot.err{background:var(--red)}
+  @keyframes pulse{50%{opacity:.35}}
+  main{display:flex;gap:14px;padding:14px 20px 20px;height:calc(100vh - 63px)}
+  .chartcard{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;
+             padding:8px 6px 2px;min-width:0;display:flex;flex-direction:column}
+  #chart{flex:1;min-height:0}
+  aside{width:300px;display:flex;flex-direction:column;gap:12px;flex-shrink:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .card h2{font-size:12px;color:var(--muted);margin:0 0 10px;font-weight:600;letter-spacing:.6px}
+  .kv{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;font-size:13px}
+  .kv .k{color:var(--muted)}
+  .kv .v{font-variant-numeric:tabular-nums;font-weight:600}
+  .up{color:var(--red)} .down{color:var(--green)}
+  .crosslist{max-height:230px;overflow:auto;margin:-4px -4px 0}
+  .cross{display:flex;justify-content:space-between;gap:8px;padding:7px 8px;border-radius:8px;
+         cursor:pointer;font-size:12.5px;font-variant-numeric:tabular-nums}
+  .cross:hover{background:#f4eef7}
+  .cross b{color:var(--red);font-weight:600}
+  .foot{font-size:11px;color:var(--muted);line-height:1.6}
+  .progress{height:3px;background:#eee;border-radius:2px;overflow:hidden;margin-top:8px;display:none}
+  .progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .4s}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#1f2329;color:#fff;
+         padding:9px 16px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .25s;pointer-events:none}
+  .toast.show{opacity:.95}
+</style>
+</head>
+<body>
+<div class="top">
+  <div>
+    <h1>沪深300全收益 vs 二级债基指数</h1>
+    <div class="sub" id="sub">2004-12-31 = 1000 ｜ 红圈：300全收益跌破二级债基</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="seg" id="range">
+    <button data-y="0" class="on">全部</button>
+    <button data-y="10">10年</button>
+    <button data-y="5">5年</button>
+    <button data-y="3">3年</button>
+    <button data-y="1">1年</button>
+  </div>
+  <button class="btn" id="mode" title="切换债券指数口径">口径：标定 Wind</button>
+  <button class="btn primary" id="refresh">刷新数据</button>
+  <div class="status"><span class="dot" id="dot"></span><span id="statusText">加载中…</span></div>
+</div>
+
+<main>
+  <div class="chartcard">
+    <div id="chart"></div>
+    <div class="progress" id="progress"><i></i></div>
+    <div style="font-size:11px;color:#9aa0a6;padding:2px 8px 4px">
+      滚轮缩放 · 拖动平移 · 双击复位 ｜ 数据：中证指数 H00300 + 天天基金公开净值重建
+    </div>
+  </div>
+  <aside>
+    <div class="card">
+      <h2>最新</h2>
+      <div class="kv"><span class="k">日期</span><span class="v" id="mDate">–</span></div>
+      <div class="kv"><span class="k">300全收益</span><span class="v" id="mHs">–</span></div>
+      <div class="kv"><span class="k">二级债基</span><span class="v" id="mBond">–</span></div>
+      <div class="kv"><span class="k">债基 / 300</span><span class="v" id="mRatio">–</span></div>
+      <div class="kv"><span class="k">年化（全区间）</span><span class="v" id="mCagr">–</span></div>
+    </div>
+    <div class="card">
+      <h2>跌破时点（共 <span id="nCross">0</span> 次）</h2>
+      <div class="crosslist" id="crosslist"></div>
+    </div>
+    <div class="card foot" id="foot"></div>
+  </aside>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>window.STATIC_MODE = true;</script>
+<script src="echarts.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

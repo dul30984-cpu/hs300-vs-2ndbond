@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>头部300ETF占沪深300流通市值比例</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --line:#e6e8eb; --text:#1f2329;
+    --muted:#7a8088; --accent:#c0392b; --red:#e03131; --green:#2f9e44;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font-family:-apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif}
+  .top{display:flex;align-items:center;gap:14px;padding:14px 20px;background:var(--card);
+       border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .top h1{font-size:17px;margin:0;font-weight:650}
+  .top .sub{font-size:12px;color:var(--muted);margin-top:3px}
+  .spacer{flex:1}
+  .btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;
+       font-size:13px;cursor:pointer;color:var(--text);text-decoration:none}
+  .btn:hover{background:#f2f3f5}
+  .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+  .seg button{border:0;background:transparent;padding:6px 11px;font-size:13px;cursor:pointer;color:var(--muted)}
+  .seg button.on{background:#f7e9e7;color:var(--accent);font-weight:600}
+  .status{font-size:12px;color:var(--muted)}
+  main{display:flex;gap:14px;padding:14px 20px 20px;height:calc(100vh - 77px)}
+  .chartcard{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;
+             padding:8px 6px 2px;min-width:0;display:flex;flex-direction:column}
+  #chart{flex:1;min-height:0}
+  aside{width:300px;display:flex;flex-direction:column;gap:12px;flex-shrink:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .card h2{font-size:12px;color:var(--muted);margin:0 0 10px;font-weight:600;letter-spacing:.6px}
+  .kv{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;font-size:13px}
+  .kv .k{color:var(--muted)}
+  .kv .v{font-variant-numeric:tabular-nums;font-weight:600}
+  .up{color:var(--red)}
+  .foot{font-size:11px;color:var(--muted);line-height:1.7}
+</style>
+</head>
+<body>
+<div class="top">
+  <div>
+    <h1>头部300ETF占沪深300流通市值比例</h1>
+    <div class="sub">四只头部沪深300ETF（510300 / 510310 / 159919 / 510330）资产净值之和 ÷ 沪深300市值</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="seg" id="range">
+    <button data-y="0">全部</button>
+    <button data-y="5">5年</button>
+    <button data-y="3">3年</button>
+    <button data-y="1">1年</button>
+  </div>
+  <div class="seg" id="denom">
+    <button data-d="float" class="on">流通市值</button>
+    <button data-d="free">自由流通</button>
+    <button data-d="total">总市值</button>
+  </div>
+  <a class="btn" href="index.html">← 300 vs 二级债基</a>
+  <div class="status" id="status">加载中…</div>
+</div>
+
+<main>
+  <div class="chartcard">
+    <div id="chart"></div>
+    <div style="font-size:11px;color:#9aa0a6;padding:2px 8px 4px">
+      滚轮缩放 · 拖动平移 · 双击复位 ｜ 灰线为沪深300收盘（右轴）
+    </div>
+  </div>
+  <aside>
+    <div class="card">
+      <h2>最新</h2>
+      <div class="kv"><span class="k">日期</span><span class="v" id="mDate">–</span></div>
+      <div class="kv"><span class="k">占比</span><span class="v up" id="mRatio">–</span></div>
+      <div class="kv"><span class="k">四只ETF合计</span><span class="v" id="mEtf">–</span></div>
+      <div class="kv"><span class="k">沪深300市值</span><span class="v" id="mMv">–</span></div>
+      <div class="kv"><span class="k">沪深300收盘</span><span class="v" id="mClose">–</span></div>
+    </div>
+    <div class="card">
+      <h2>历史极值</h2>
+      <div class="kv"><span class="k">最高占比</span><span class="v" id="mMax">–</span></div>
+      <div class="kv"><span class="k">最低占比</span><span class="v" id="mMin">–</span></div>
+    </div>
+    <div class="card foot" id="foot"></div>
+  </aside>
+</main>
+
+<script>window.STATIC_MODE = true;</script>
+<script src="echarts.min.js"></script>
+<script src="etf.js"></script>
+</body>
+</html>
